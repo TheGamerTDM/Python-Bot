@@ -1,0 +1,29 @@
+{
+    "redis": true,
+    "__comment": "select -> index of config to use (starting from 0)",
+    "select": 0,
+    "configs": [
+        {
+            "mongo": {
+                "URI": "",
+                "database": "",
+                "timeout": 10000
+            },
+            "lavalink": {
+                "password": "testing",
+                "port": 7000
+            },
+            "sentry": "",
+            "command_prefixes": ["."],
+            "color": "0xd74613",
+            "token": "",
+            "osuAPI": "",
+            "ppAPI": {
+                "URL": "https://pp.aesth.dev",
+                "secret": "potato"
+            },
+            "owners": [561936690063605760],
+            "splashArt": ""
+        }
+    ]
+}
