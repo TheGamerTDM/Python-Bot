@@ -1,23 +1,23 @@
+import asyncio
 import re
-from asyncio import sleep
 import discord
+import async_timeout
+from discord import member
 from discord.ext import commands
 import lavalink
 import math
 
 url_rx = re.compile(r'https?://(?:www\.)?.+')
-time_rx = re.compile('[0-9]+')
 
 
 class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.pause = True
-        self.request = []
 
         if not hasattr(bot, 'lavalink'):  # This ensures the client isn't overwritten during cog reloads.
             bot.lavalink = lavalink.Client(bot.user.id)
-            bot.lavalink.add_node('localhost', 7000, 'testing', 'eu',
+            bot.lavalink.add_node('localhost', 7000, "youshallnotpass", 'eu',
                                   'music-node')  # Host, Port, Password, Region, Name
             bot.add_listener(bot.lavalink.voice_update_handler, 'on_socket_response')
 
@@ -79,13 +79,7 @@ class Music(commands.Cog):
         """ Searches and plays a song from a given query. """
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
-        if not self.pause:
-            await player.set_pause(False)
-            await ctx.send(f'▶ **Resuming**')
-            self.pause = True
-        elif query is None:
-            await ctx.send(f'**Pleas type some thing or paste a url**')
-        else:
+        if query:
             await ctx.send(f'**Searching**🔎 `{query}`.')
             query = query.strip('<>')
 
@@ -103,13 +97,11 @@ class Music(commands.Cog):
             #   SEARCH_RESULT   - query prefixed with either ytsearch: or scsearch:.
             #   NO_MATCHES      - query yielded no results
             #   LOAD_FAILED     - most likely, the video encountered an exception during loading.
-            await sleep(0.5)
             if results['loadType'] == 'PLAYLIST_LOADED':
                 tracks = results['tracks']
 
-
                 for track in tracks:
-                    player.add(requester=ctx.author.id, track=track)
+                    player.add(requester=ctx.author, track=track)
 
                 await ctx.send(
                     f'**Queueing up** 🎶 `{results["playlistInfo"]["name"]} - {len(tracks)}` - Now! Requested by: {ctx.author}')
@@ -117,13 +109,20 @@ class Music(commands.Cog):
                 track = results['tracks'][0]
                 await ctx.send(f'**Queueing up** 🎶 `{track["info"]["title"]}` - Now! Requested by: {ctx.author}')
 
-                track = lavalink.models.AudioTrack(track, ctx.author.id, recommended=True)
-                player.add(requester=ctx.author.id, track=track)
+                track = lavalink.models.AudioTrack(track, ctx.author, recommended=True)
+                player.add(requester=ctx.author, track=track)
 
             if not player.is_playing:
                 await player.play()
 
-    @commands.command(aliases=['forceskip', 'fs'])
+        elif not self.pause:
+            await player.set_pause(False)
+            await ctx.send(f'**Resuming** ▶')
+            self.pause = True
+        elif query is None:
+            await ctx.send(f'**Pleas type some thing or paste a url**')
+
+    @commands.command(aliases=["Skip", 'SKIP', 's'])
     async def skip(self, ctx):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
@@ -175,24 +174,81 @@ class Music(commands.Cog):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.queue:
-            return await ctx.send('There\'s nothing in the queue! Why not queue something?')
+            return await ctx.send(f'There isn\'t any track in queue. Use **Now** or **N**. To see what\'s playing')
 
+        # if member.User.nick:
+        #     items_per_page = 10
+        #     pages = math.ceil(len(player.queue) / items_per_page)
+        #
+        #     start = (page - 1) * items_per_page
+        #     end = start + items_per_page
+        #
+        #     duration = lavalink.utils.format_time(player.current.duration)
+        #
+        #     queue_list = ''
+        #
+        #     for i, track in enumerate(player.queue[start:end], start=start):
+        #         durations = lavalink.utils.format_time(track.duration)
+        #         if durations[0:2] == '00':
+        #             if durations[3:4] == '0':
+        #                 queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[4:]} Requested by: {track.requester.nick} ({track.requester})`\n\n'
+        #             else:
+        #                 queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[3:]} Requested by: {track.requester.nick} ({track.requester})`\n\n'
+        #         else:
+        #             queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations} Requested by: {track.requester.nick} ({track.requester})`\n\n '
+        #
+        #     if duration[0:2] == '00':
+        #         if duration[3:4] == '0':
+        #             song = f'[{player.current.title}]({player.current.uri}) | `{duration[4:]} Requested by: {track.requester.nick} ({track.requester})`'
+        #         else:
+        #             song = f'[{player.current.title}]({player.current.uri}) | `{duration[3:]} Requested by: {track.requester.nick} ({track.requester})`'
+        #     else:
+        #         song = f'[{player.current.title}]({player.current.uri}) | `{duration} Requested by: {track.requester.nick} ({track.requester})`'
+        #
+        #     embed = discord.Embed(colour=ctx.guild.me.top_role.colour,
+        #                           title=f'**Queue list**',
+        #                           description=f'**__Now Playing:__**\n{song}\n\n**__Up Next:__**\n{queue_list}')
+        #
+        #     embed.set_footer(
+        #         icon_url=f'{ctx.message.author.avatar_url}',
+        #         text=f'\n {len(player.queue)} tracks \n page {page}/{pages}')
+        #
+        #     await ctx.send(embed=embed)
+        # else:
         items_per_page = 10
         pages = math.ceil(len(player.queue) / items_per_page)
 
         start = (page - 1) * items_per_page
         end = start + items_per_page
+
         duration = lavalink.utils.format_time(player.current.duration)
+
         queue_list = ''
+
         for i, track in enumerate(player.queue[start:end], start=start):
-            queue_list += f'`{i + 1}.` [**{track.title}**]({track.uri})\n'
+            durations = lavalink.utils.format_time(track.duration)
+            if durations[0:2] == '00':
+                if durations[3:4] == '0':
+                    queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[4:]} Requested by: {track.requester}`\n\n'
+                else:
+                    queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[3:]} Requested by: {track.requester}`\n\n'
+            else:
+                queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations} Requested by: {track.requester}`\n\n '
+
+        if duration[0:2] == '00':
+            if duration[3:4] == '0':
+                song = f'[{player.current.title}]({player.current.uri}) | `{duration[4:]} Requested by: {track.requester}`'
+            else:
+                song = f'[{player.current.title}]({player.current.uri}) | `{duration[3:]} Requested by: {track.requester}`'
+        else:
+            song = f'[{player.current.title}]({player.current.uri}) | `{duration} Requested by:{track.requester}`'
 
         embed = discord.Embed(colour=ctx.guild.me.top_role.colour,
-                              title='Queue list',
-                              description=f'{queue_list}')
+                              title=f'**Queue list**',
+                              description=f'**__Now Playing:__**\n{song}\n\n**__Up Next:__**\n{queue_list}')
 
         embed.set_footer(
-            # icon_url=f'{ctx.message.author.avatar_url}',
+            icon_url=f'{ctx.message.author.avatar_url}',
             text=f'\n {len(player.queue)} tracks \n page {page}/{pages}')
 
         await ctx.send(embed=embed)
@@ -206,14 +262,19 @@ class Music(commands.Cog):
             return await ctx.send('Nothing playing.')
 
         position = lavalink.utils.format_time(player.position)
-        if player.current.stream:
-            duration = '🔴 LIVE'
+        duration = lavalink.utils.format_time(player.current.duration)
+
+        if duration[0:2] == '00':
+            if duration[3:4] == '0':
+                song = f'[{player.current.title}]({player.current.uri})\n`{duration[4:]}/{position[4:]}`'
+            else:
+                song = f'[{player.current.title}]({player.current.uri})\n`{duration[3:]}/{position[3:]}`'
         else:
-            duration = lavalink.utils.format_time(player.current.duration)
-        song = f'**[{player.current.title}]({player.current.uri})**\n({position}/{duration})'
+            song = f'[{player.current.title}]({player.current.uri})\n`{duration}/{position}`'
 
         embed = discord.Embed(colour=ctx.guild.me.top_role.colour,
-                              title='Now Playing', description=song)
+                              title='Now Playing',
+                              description=song)
         await ctx.send(embed=embed)
 
     @commands.command(aliases=['SEEK', 'Seek'])

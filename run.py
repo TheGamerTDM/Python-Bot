@@ -18,7 +18,7 @@ def list_module(directory):
 @bot.command()
 async def aboutme(ctx):
     await ctx.send(f"This is a bot for fun that im making. Owner: (Yakoi#4895). I love programing and this bot is "
-                   f"made with python")
+                   f"made 100% with python")
 
 
 @bot.command()

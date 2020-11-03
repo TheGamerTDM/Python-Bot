@@ -1,4 +1,4 @@
-import random, time, asyncio, discord, praw, json, requests
+import random, time, asyncio, discord, praw, json, requests, aiohttp
 from discord.ext import commands
 
 def setup(bot):
@@ -21,7 +21,6 @@ class Fun(commands.Cog):
     async def gif(self, ctx, *, pick):
         """Search on a gif sit on random gifs that you want"""
         hep = ['help', 'HELP']
-        # subreddit = ['dankmemes', 'memes', 'ohffensivememes', 'ksi']
 
         if pick in hep:
             await ctx.send('```py\n1. dankmemes\n2. memes\n3. offensivememes\n4. ksi\n5. Type what you want to see```')
@@ -61,37 +60,59 @@ class Fun(commands.Cog):
         await message.add_reaction('🤷')
 
 
+    @commands.command(hidden=True)
+    @commands.is_nsfw()
+    async def nsfw(self, ctx):
+        if ctx.channel.is_nsfw():
+            embed = discord.Embed(title="DAMN GIRL", description="WAX")
+            async with aiohttp.ClientSession() as cs:
+                async with cs.get('https://www.reddit.com/r/nsfw/new.json?sort=hot') as r:
+                    res = await r.json()
+                    embed.set_image(url=res['data']['children'][random.randint(0, 25)]['data']['url'])
+                    await ctx.send(embed=embed)
+        else:
+            await ctx.send('You need a nsfw channel')
+
 
 
     @commands.command(aliases=['Reddit', 'rt'])
     async def reddit(self, ctx, *, memez):
         """Search on reddit"""
+        async with aiohttp.ClientSession() as cs:
+            async with cs.get('https://www.reddit.com/r/nsfw/new.json?sort=hot') as r:
+                res = await r.json()
+                banndelist = res
 
-        hep = ['help', 'HELP']
-        subreddit = ['dankmemes', 'memes', 'ohffensivememes', 'ksi']
-        banndelist = '' #['porn','furry','pornhub','thick','dick','gonewild','']
 
-        if memez in hep:
-            await ctx.send('```py\n1. dankmemes\n2. memes\n3. ohffensivememes\n4. ksi\n5. Type what subreddit you want```')
-            return
-        if memez not in banndelist:
-            if memez not in subreddit:
-                memes_submissions = agent.subreddit(memez).hot()
-                post_to_pick = random.randint(1, 30)
-                for i in range(0, post_to_pick):
-                    submission = next(x for x in memes_submissions if not x.stickied)
-
-                await ctx.send(submission.url)
-            elif memez in subreddit:
-                memes_submissions = agent.subreddit(memez)
-                post_to_pick = random.randint(1, 30)
-                for i, j in enumerate(memes_submissions.hot(limit=30)):
-                    if i == post_to_pick:
-                        await ctx.send(j.url)
-            else:
-                await ctx.send("Not a valid subreddit")
+        if memez in banndelist:
+            print('NOOOO')
+            await ctx.send('NOOOO')
         else:
-            await ctx.send('U BANDE MF')
+            hep = ['help', 'HELP']
+            subreddit = ['dankmemes', 'memes', 'ohffensivememes', 'ksi']
+            if memez in hep:
+                await ctx.send(
+                    '```py\n1. dankmemes\n2. memes\n3. ohffensivememes\n4. ksi\n5. Type what subreddit you want```')
+                return
+            if memez not in banndelist:
+                if memez not in subreddit:
+                    memes_submissions = agent.subreddit(memez).hot()
+                    post_to_pick = random.randint(1, 30)
+                    for i in range(0, post_to_pick):
+                        submission = next(x for x in memes_submissions if not x.stickied)
+
+                    await ctx.send(submission.url)
+                elif memez in subreddit:
+                    memes_submissions = agent.subreddit(memez)
+                    post_to_pick = random.randint(1, 30)
+                    for i, j in enumerate(memes_submissions.hot(limit=30)):
+                        if i == post_to_pick:
+                            await ctx.send(j.url)
+                else:
+                    await ctx.send("Not a valid subreddit")
+            else:
+                await ctx.send('Its bannde')
+
 
     @commands.command(name="8ball", aliases=['8BALL'])
     async def _8ball(self, ctx, *, question):
@@ -139,7 +160,7 @@ class Fun(commands.Cog):
             ]
         await ctx.send(f'Question: {question}\nMy answer: {random.choice(responses)}')
 
-    @commands.command(aliases=['flip', 'coin'])
+    @commands.command(aliases=['flip', 'coin', 'cf'])
     async def coinflip(self, ctx):
         """ Flip a coin! """
         coinsides = ['Heads', 'Tails']
@@ -192,3 +213,4 @@ class Fun(commands.Cog):
             beer_offer = beer_offer + f"\n\n**Reason:** {reason}" if reason else beer_offer
             await msg.edit(content=beer_offer)
 
+    

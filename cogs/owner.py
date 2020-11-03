@@ -4,12 +4,33 @@ from datetime import datetime
 import os
 
 
-class OwnerCog(commands.Cog, command_attrs=dict(hidden=True), name="Owner"):
+@commands.is_owner()
+class OwnerCog(commands.Cog, command_attrs=dict(hidden=False), name="Owner"):
     """Commands meant for the owner only."""
 
     def __init__(self, bot):
         self.bot = bot
         self._last_result = None
+
+    @commands.command(name='OwnerDelete', aliases=['odel'])
+    @commands.is_owner()
+    async def odel(self, ctx, count: int):
+        """Owner Delete :D"""
+        await ctx.message.channel.purge(limit=count + 1, bulk=True)
+
+    @commands.command(name='reload')
+    @commands.is_owner()
+    async def _reload(self, ctx, *, module: str):
+        """Reloads a module."""
+        try:
+            self.bot.unload_extension(module)
+            self.bot.load_extension(module)
+        except Exception as e:
+            await ctx.send('\N{PISTOL}')
+            await ctx.send('{}: {}'.format(type(e).__name__, e))
+        else:
+            await ctx.send('DONE :D')
+            await ctx.send('\N{OK HAND SIGN}')
 
     @commands.command(name='pull')
     @commands.is_owner()
