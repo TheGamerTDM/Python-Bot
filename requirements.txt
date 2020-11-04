@@ -1,0 +1,12 @@
+discord.py
+dnspython
+GitPython
+motor
+lavalink
+aiohttp
+websockets
+pyttanko
+redis
+jishaku
+sentry-sdk
+pyfiglet

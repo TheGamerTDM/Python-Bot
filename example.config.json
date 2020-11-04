@@ -1,0 +1,26 @@
+{
+    "redis": true,
+    "__comment": "select -> index of config to use (starting from 0)",
+    "select": 0,
+    "configs": [
+        {
+            "mongo": {
+                "URI": "Type your mongodb uri that you have to make",
+                "database": "the data base name",
+                "timeout": 10000
+            },
+            "lavalink": {
+                "password": "Type your password here from the yml",
+                "port": Type your port here from yml e.g. 7000
+            },
+            "sentry": "",
+            "command_prefixes": ["."],
+            "color": "0xd74613",
+            "token": "put your token here",
+            "owners": [Type your own id from discord],
+            "splashArt": "Type some thing here it could be your gamer tag ;)"
+        }
+    ]
+}
+
+and thats it dont forget to delete this and other stuff :D
