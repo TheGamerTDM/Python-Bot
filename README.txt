@@ -12,4 +12,4 @@ C:\Users\[UserName]\Desktop\Discord-Music-Master\jdk-13.0.2\bin
 Mostly you have to put it in the jdk-[Version] e.g. [13.0.2]\bin folder with application.yml then start cmd up and run lavalink then run your bot:D
 
 
-If u dumb af wach this https://www.youtube.com/watch?v=OGeu_IS0o1A&t
+If u dumb af watch this https://www.youtube.com/watch?v=OGeu_IS0o1A&t
