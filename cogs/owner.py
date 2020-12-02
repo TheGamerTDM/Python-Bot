@@ -16,7 +16,21 @@ class OwnerCog(commands.Cog, command_attrs=dict(hidden=False), name="Owner"):
     @commands.is_owner()
     async def odel(self, ctx, count: int):
         """Owner Delete :D"""
+        if count > 10:
+            count = 10
         await ctx.message.channel.purge(limit=count + 1, bulk=True)
+
+    @commands.command()
+    @commands.is_owner()
+    async def load(self, ctx, *, module: str):
+        self.bot.load_extension(module)
+        await ctx.send(f'Done loading {module}')
+
+    @commands.command()
+    @commands.is_owner()
+    async def unload(self, ctx, *, module: str):
+        self.bot.unload_extension(module)
+        await ctx.send(f'Done unloading {module}')
 
     @commands.command(name='reload')
     @commands.is_owner()

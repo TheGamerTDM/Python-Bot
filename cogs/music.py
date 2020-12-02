@@ -81,7 +81,7 @@ class Music(commands.Cog):
             query = query.strip('<>')
 
             if not url_rx.match(query):
-                query = f'ytsearch:{query}'
+                query = f'ytsearch:{query}' or f'scsearch:{query}' or f'ssearch:{query}'
 
             results = await player.node.get_tracks(query)
 
@@ -162,6 +162,7 @@ class Music(commands.Cog):
             return await ctx.send('You\'re not in my voicechannel!')
 
         player.queue.clear()
+        await player.skip()
         await player.stop()
         await self.connect_to(ctx.guild.id, None)
         await ctx.send(f'<:pepebigcry:767628237546192926> **Successfully disconnected**')
@@ -173,45 +174,6 @@ class Music(commands.Cog):
         if not player.queue:
             return await ctx.send(f'There isn\'t any track in queue. Use **Now** or **N**. To see what\'s playing')
 
-        # if member.User.nick:
-        #     items_per_page = 10
-        #     pages = math.ceil(len(player.queue) / items_per_page)
-        #
-        #     start = (page - 1) * items_per_page
-        #     end = start + items_per_page
-        #
-        #     duration = lavalink.utils.format_time(player.current.duration)
-        #
-        #     queue_list = ''
-        #
-        #     for i, track in enumerate(player.queue[start:end], start=start):
-        #         durations = lavalink.utils.format_time(track.duration)
-        #         if durations[0:2] == '00':
-        #             if durations[3:4] == '0':
-        #                 queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[4:]} Requested by: {track.requester.nick} ({track.requester})`\n\n'
-        #             else:
-        #                 queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[3:]} Requested by: {track.requester.nick} ({track.requester})`\n\n'
-        #         else:
-        #             queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations} Requested by: {track.requester.nick} ({track.requester})`\n\n '
-        #
-        #     if duration[0:2] == '00':
-        #         if duration[3:4] == '0':
-        #             song = f'[{player.current.title}]({player.current.uri}) | `{duration[4:]} Requested by: {track.requester.nick} ({track.requester})`'
-        #         else:
-        #             song = f'[{player.current.title}]({player.current.uri}) | `{duration[3:]} Requested by: {track.requester.nick} ({track.requester})`'
-        #     else:
-        #         song = f'[{player.current.title}]({player.current.uri}) | `{duration} Requested by: {track.requester.nick} ({track.requester})`'
-        #
-        #     embed = discord.Embed(colour=ctx.guild.me.top_role.colour,
-        #                           title=f'**Queue list**',
-        #                           description=f'**__Now Playing:__**\n{song}\n\n**__Up Next:__**\n{queue_list}')
-        #
-        #     embed.set_footer(
-        #         icon_url=f'{ctx.message.author.avatar_url}',
-        #         text=f'\n {len(player.queue)} tracks \n page {page}/{pages}')
-        #
-        #     await ctx.send(embed=embed)
-        # else:
         items_per_page = 10
         pages = math.ceil(len(player.queue) / items_per_page)
 

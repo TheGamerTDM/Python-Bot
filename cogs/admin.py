@@ -1,6 +1,5 @@
 import random, time, asyncio, discord, praw, json, requests
 from discord.ext import commands
-from commons import checks
 from asyncio import sleep
 
 
@@ -10,11 +9,15 @@ class Admin(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    ##################################################### SPAM #####################################################
-    @checks.can_managemsg()
-    @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.user)
+    @commands.command(aliases=['SPAM'])
+    @commands.has_permissions(manage_messages=True)
     async def spam(self, ctx, times: int, *, content='repeating...'):
-        """SPAM AS MUCH AS YOU WANT"""
+        """Spam as much as you want (Max 100)
+
+        EXAMPLE: pbspam 5 i love you mom
+        RESULT: (i love you mom) x 5
+        """
         await ctx.message.channel.purge(limit=1)
         if times <= 100:
             for i in range(times):
@@ -22,11 +25,14 @@ class Admin(commands.Cog):
         else:
             await ctx.send(f'Under 100 please. U {times}')
 
-    ##################################################### SEND #####################################################
-    @checks.can_managemsg()
-    @commands.command()
+    @commands.command(aliases=['SEND'])
+    @commands.has_permissions(manage_messages=True)
     async def send(self, ctx, channel, *, content):
-        """Send a message to a channel"""
+        """Send a message to a channel
+
+        EXAMPLE: pbsend #chat how are you guys
+        RESULT: in #chat how are you guys
+        """
         if "#" in channel:
             channel = self.bot.get_channel(int(channel[2:-1]))
             await channel.send(content)
@@ -34,10 +40,14 @@ class Admin(commands.Cog):
             channel = self.bot.get_channel(int(channel))
             await channel.send(content)
 
-    @checks.can_kick()
-    @commands.command()
+    @commands.command(aliases=['KICK'])
+    @commands.has_permissions(kick_members=True)
     async def kick(self, ctx, user: discord.Member):
-        """Kicks a user from the server."""
+        """Kicks a user from the server.
+
+        EXAMPLE: pbkick @username
+        RESULT: @username kicked from the server
+        """
         if ctx.author == user:
             await ctx.send("You cannot kick yourself.")
         else:
@@ -47,10 +57,14 @@ class Admin(commands.Cog):
             embed.set_thumbnail(url=user.avatar_url)
             await ctx.send(embed=embed)
 
-    @checks.can_ban()
-    @commands.command()
+    @commands.command(aliases=['BAN'])
+    @commands.has_permissions(ban_members=True)
     async def ban(self, ctx, user: discord.Member):
-        """Bans a user from the server."""
+        """Bans a user from the server.
+
+        EXAMPLE: pbban @username
+        RESULT: @username bande from the server
+        """
         if ctx.author == user:
             await ctx.send("You cannot ban yourself.")
         else:
@@ -60,10 +74,14 @@ class Admin(commands.Cog):
             embed.set_thumbnail(url=user.avatar_url)
             await ctx.send(embed=embed)
 
-    @checks.can_mute()
-    @commands.command()
+    @commands.command(aliases=['MUTE'])
+    @commands.has_permissions(manage_channels=True)
     async def mute(self, ctx, user: discord.Member, time: int):
-        """Prevents a user from speaking for a specified amount of time."""
+        """Prevents a user from speaking for a specified amount of time.
+
+        EXAMPLE: pbmute @username 120
+        RESULT: @username gets muted for 120 sec
+        """
         if ctx.author == user:
             await ctx.send("You cannot mute yourself.")
         else:
@@ -95,10 +113,14 @@ class Admin(commands.Cog):
             else:
                 await ctx.send(f'User {user.mention} is already muted.')
 
-    @checks.can_mute()
-    @commands.command()
+    @commands.command(aliases=['UNMUTE'])
+    @commands.has_permissions(manage_channels=True)
     async def unmute(self, ctx, user: discord.Member):
-        """Unmutes a user."""
+        """Unmutes a user.
+
+        EXAMPLE: pbunmute @username
+        RESULT: @username gets unmutede
+        """
         rolem = discord.utils.get(ctx.message.guild.roles, name='Muted')
         if rolem in user.roles:
             embed = discord.Embed(title=f'User {user.name} has been manually unmuted.', color=0x00ff00)
@@ -107,18 +129,27 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
             await user.remove_roles(rolem)
 
-    @checks.can_managemsg()
-    @commands.command(name='remove', aliases=['dump', 'rm', 'clear'])
+    @commands.command(name='remove', aliases=['dump', 'rm', 'clear','REMOVE','RM'])
+    @commands.has_permissions(manage_messages=True)
     async def prune(self, ctx, count: int):
-        """Deletes a specified amount of messages. (Max 100)"""
+        """Deletes a specified amount of messages. (Max 100)
+
+        EXAMPLE: pbpurne 50
+        RESULT: delets 50 msg in that channel
+        Command aliases: ['dump', 'rm', 'clear']
+        """
         if count > 100:
             count = 100
         await ctx.message.channel.purge(limit=count + 1, bulk=True)
 
-    @checks.can_managemsg()
-    @commands.command()
+    @commands.command(aliases=['CLEAN'])
+    @commands.has_permissions(manage_messages=True)
     async def clean(self, ctx):
-        """Cleans the chat of the bot's messages."""
+        """Cleans the chat of the bot's messages.
+
+        EXAMPLE: pbclean
+        RESULT: it removes what the bot have sendt. 100 at a time
+        """
 
         def is_me(m):
             return m.author == self.bot.user

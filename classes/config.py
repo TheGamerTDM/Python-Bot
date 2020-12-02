@@ -6,7 +6,7 @@ class Config():
 
     def __init__(
         self, redis: bool, mongo: Dict, lavalink: Dict, sentry: str, command_prefixes: List, token: str,
-        owners:List[int], splashArt: str, color: int
+        owners:List[int], alloweds:List[int], color: int
     ):
         self.redis = redis
         self.mongo = mongo
@@ -15,7 +15,7 @@ class Config():
         self.command_prefixes = command_prefixes
         self.token = token
         self.owners = owners
-        self.splashArt = splashArt
+        self.alloweds = alloweds
         self.color = color
 
     @classmethod
@@ -26,7 +26,8 @@ class Config():
             with open(path, "r") as configJSON:
                 configData = configJSON.read()
 
-
+            #try:
+                # Parse JSON file
             configDict = json.loads(configData)
             selectedConfig = configDict["configs"][configDict["select"]]
             configJSON.close()
@@ -38,6 +39,9 @@ class Config():
                 selectedConfig["command_prefixes"],
                 str(selectedConfig["token"]),
                 list(selectedConfig["owners"]),
-                str(selectedConfig["splashArt"]),
+                list(selectedConfig["alloweds"]),
                 int(selectedConfig["color"], 16)
             )
+
+            #except Exception:
+            #    raise ValueError("Misformatted JSON provided!")

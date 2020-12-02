@@ -1,18 +1,27 @@
 import discord
 from discord.ext import commands
 
+
 class Information(commands.Cog):
     """Retrieve information about various items."""
 
     def __init__(self, bot):
         self.bot = bot
 
+    @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command()
+    @commands.guild_only()
     async def userinfo(self, ctx, user: discord.Member = None):
+        """
+        Gives you userinfo about your self or others
+
+        EXAMPLE: pbuserinfo or pbuserinfo @username
+        RESULT: 1. Get info about your self. 2. Get info about @username
+        """
         if user is None:
             user = ctx.message.author
         if user.activity is not None:
-            game = user.activity.name
+            game = user.activity
         else:
             game = None
         voice_state = None if not user.voice else user.voice.channel
@@ -21,12 +30,11 @@ class Information(commands.Cog):
             "User ID": user.id,
             "Nick": user.nick,
             "Status": user.status,
-            "On Mobile": user.is_on_mobile(),
             "In Voice": voice_state,
             "Game": game,
             "Highest Role": user.top_role.name,
-            "Account Created": user.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'),
-            "Join Date": user.joined_at.__format__('%A, %d. %B %Y @ %H:%M:%S')
+            "Account Created": user.created_at.date(),
+            "Join Date": user.joined_at.date()
         }
         for n, v in embed_values.items():
             embed.add_field(name=n, value=v, inline=True)
@@ -35,29 +43,30 @@ class Information(commands.Cog):
         embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
         await ctx.send(embed=embed)
 
-    @commands.command()
-    async def serverinfo(self, ctx):
-        role_count = len(ctx.guild.roles)
-        emoji_count = len(ctx.guild.emojis)
-        channel_count = len([x for x in ctx.guild.channels if isinstance(x, discord.channel.TextChannel)])
-        embed = discord.Embed(color=self.bot.config.color, timestamp=ctx.message.created_at)
-        embed_values = {
-            "Name (ID)": (f"{ctx.guild.name} ({ctx.guild.id})", False),
-            "Owner": (ctx.guild.owner, False),
-            "Member Count": (ctx.guild.member_count, True),
-            "Text Channels": (str(channel_count), True),
-            "Region": (ctx.guild.region, True),
-            "Verification Level": (str(ctx.guild.verification_level), True),
-            "Highest Role": (ctx.guild.roles[-1], True),
-            "Number of Roles": (str(role_count), True),
-            "Number of Emotes": (str(emoji_count), True),
-            "Created On": (ctx.guild.created_at.__format__('%A, %d. %B %Y @ %H:%M:%S'), True)
-        }
-        for n, v in embed_values.items():
-            embed.add_field(name=n, value=v[0], inline=v[1])
-        embed.set_thumbnail(url=ctx.guild.icon_url)
-        embed.set_author(name=ctx.author.name, icon_url=ctx.author.avatar_url)
-        embed.set_footer(text=self.bot.user.name, icon_url=self.bot.user.avatar_url)
+    @commands.cooldown(1, 2, commands.BucketType.user)
+    @commands.guild_only()
+    @commands.command(name="serverinfo", aliases=["si", "ss", "check-stats", 'cs'])
+    async def _serverstats(self, ctx: commands.Context):
+        """
+        Get serverinfo
+
+        EXAMPLE: pbserverinfo
+        RESULT: Get server info
+        """
+        embed = discord.Embed(
+            color=discord.Colour.orange(),
+            title=f"{ctx.guild.name}")
+
+        embed.set_thumbnail(url=f"{ctx.guild.icon_url}")
+        embed.add_field(name="👑Owner", value=f"<@{ctx.message.guild.owner_id}>", inline=False)
+        embed.add_field(name="🌍Region", value=f"{ctx.guild.region}")
+        embed.add_field(name="👥Member's", value=f"{ctx.guild.member_count}")
+        embed.add_field(name="🤣Emoji's", value=f"{len(ctx.guild.emojis)}")
+        embed.add_field(name="🧻Roles", value=f"{len(ctx.guild.roles)}")
+        embed.add_field(name="📄Text Channel", value=f"{len(ctx.guild.text_channels)}")
+        embed.add_field(name="📆Created at", value=f"{ctx.guild.created_at.date()}")
+        embed.set_footer(icon_url=f"{ctx.author.avatar_url}", text=f"Requested by {ctx.author.name}")
+
         await ctx.send(embed=embed)
 
 

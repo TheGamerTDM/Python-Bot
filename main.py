@@ -1,10 +1,28 @@
+import time
+import discord
+import asyncio
+import os
 import sys
 import traceback
-
 from classes.bot import PythonBot
-import asyncio, os, discord, pyfiglet, time
+from discord.ext import commands
+import utils
 
-bot = PythonBot(description='Python Bot', activity=discord.Game(name='my dick'))
+intent = discord.Intents.all()
+intent.presences = False
+
+opts = {
+    "description": 'Python Bot',
+    "command_not_found": "",
+    "activity": discord.Game(name='pbhelp for help :D'),
+    "allowed_mentions": discord.AllowedMentions(everyone=False),
+    "intents": intent,
+    "help_command": None,
+    "chunk_guilds_at_startup": False,
+    "guild_subscriptions": True,
+}
+
+bot = PythonBot(**opts, case_insensitive=True)
 
 try:
     import sentry_sdk
@@ -18,33 +36,12 @@ def list_module(directory):
     return (f for f in os.listdir(directory) if f.endswith('.py'))
 
 
-@bot.command()
-async def aboutme(ctx):
-    await ctx.send(f"This is a bot for fun that im making. Owner: (Yakoi#4895). I love programing and this bot is "
-                   f"made 100% with python")
-
-
-@bot.command()
-async def ping(ctx):
-    """Ping command."""
-    t1 = time.perf_counter()
-    await ctx.trigger_typing()
-    t2 = time.perf_counter()
-    await ctx.send(f"Ping: {round((t2 - t1) * 1000)} ms")
-
-
-@bot.listen('on_ready')
+@bot.event
 async def on_ready():
-    f = pyfiglet.Figlet()
-    print(f.renderText(bot.config.splashArt))
-    print(f'\n\nLogged in as: {bot.user.name} - {bot.user.id}\nVersion: {discord.__version__}\n')
-    print(f'Successfully logged in and booted...!')
-    try:
-        bot.load_extension('music')
-    except:
-        pass
+    print(f'{bot.user.name}')
+
     # Load Modules
-    module_folders = ['listeners', 'cogs']
+    module_folders = ['cogs']
     for module in module_folders:
         for extension in list_module(module):
             try:
@@ -59,6 +56,8 @@ async def run():
 
 
 if __name__ == '__main__':
+    bot.remove_command("help")
+
     loop = asyncio.get_event_loop()
     try:
         loop.run_until_complete(run())

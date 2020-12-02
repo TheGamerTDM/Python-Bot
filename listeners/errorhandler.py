@@ -3,8 +3,10 @@ import sys
 from discord.ext import commands
 import discord
 
+
 class CommandErrorHandler(commands.Cog, name="Error Handler"):
     """Handles any errors that may occur."""
+
     def __init__(self, bot):
         self.bot = bot
 
@@ -36,6 +38,7 @@ class CommandErrorHandler(commands.Cog, name="Error Handler"):
         await ctx.send(embed=embed)
         print(f'Ignoring exception in command {ctx.command}:', file=sys.stderr)
         traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+
 
 def setup(bot):
     bot.add_cog(CommandErrorHandler(bot))

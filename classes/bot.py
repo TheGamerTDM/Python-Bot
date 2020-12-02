@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from motor import motor_asyncio
 from classes.config import Config
-from commons.mongoIO import mongoIO
+from mongoIO import mongoIO
 
 
 class PythonBot(commands.AutoShardedBot):
@@ -12,7 +12,7 @@ class PythonBot(commands.AutoShardedBot):
         """A callable Prefix for our bot. This also has the ability to ignore certain messages by passing an empty string."""
 
         if await self.mongoIO.isBlacklisted(message.author) or not message.guild:
-            return ' ' # Ignore if user is blacklisted or message is not in a guild
+            return ' '  # Ignore if user is blacklisted or message is not in a guild
 
         guildPref = await self.mongoIO.getSetting(message.guild, 'prefix')
         result = self.config.command_prefixes.copy()
@@ -26,13 +26,14 @@ class PythonBot(commands.AutoShardedBot):
             command_prefix=self.__get_prefix,
             activity=kwargs.pop("activity")
         )
-        self.config=Config.fromJSON("config.json")
-        self.motorClient = motor_asyncio.AsyncIOMotorClient(self.config.mongo['URI'], serverSelectionTimeoutMS=self.config.mongo['timeout'])
+        self.config = Config.fromJSON("config.json")
+        self.motorClient = motor_asyncio.AsyncIOMotorClient(self.config.mongo['URI'],
+                                                            serverSelectionTimeoutMS=self.config.mongo['timeout'])
         self.mongoIO = mongoIO(self)
 
-    async def on_message(self, msg): # Ignore messages
+    async def on_message(self, msg):  # Ignore messages
         if not self.is_ready() or msg.author.bot:
-           return
+            return
         await self.process_commands(msg)
 
     async def is_owner(self, user: discord.User):
@@ -42,3 +43,9 @@ class PythonBot(commands.AutoShardedBot):
         # Else fall back to the original
         return await super().is_owner(user)
 
+    async def is_allowed(self, user: discord.User):
+        if user.id in self.config.alloweds:
+            return True
+
+        # Else fall back to the original
+        return await super().is_allowed(user)
