@@ -236,7 +236,11 @@ class Fun(commands.Cog):
         EXAMPLE: pbf
         RESULT: @username has paid their respect
         """
-        await ctx.message.channel.purge(limit=1)
+
+        def is_me(m):
+            return m.author == ctx.author
+
+        await ctx.message.channel.purge(limit=1, check=is_me)
         hearts = ['❤', '💛', '💚', '💙', '💜']
         reason = f"for **{text}** " if text else ""
         await ctx.send(f"**{ctx.author.name}** has paid their respect {reason}{random.choice(hearts)}")
