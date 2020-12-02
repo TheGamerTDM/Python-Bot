@@ -16,7 +16,6 @@ class figherfuckers():
         self.health = 100
         self.armor = 0
 
-
 @commands.is_owner()
 class fight(commands.Cog):
     def __init__(self, bot):
@@ -50,7 +49,7 @@ class fight(commands.Cog):
         async def performTurn(attacker, opponent, retry):
             print('yes5')
             await ctx.send(
-                f'{self.turn.mention}, what do you want to do? `punch`, `defend` or `end``?\nType your choice '
+                f'{self.turn.mention}, what do you want to do? `punch`, `defend` or `end`?\nType your choice '
                 f'out in chat as it\'s displayed!')
             prompt = await ctx.MessageCollector.awaitMessage(ctx.channel.id, attacker.id, 30e3)
             if not prompt:
@@ -120,4 +119,3 @@ class fight(commands.Cog):
                 await ctx.send(f'{wowword} **{winner.name}** {noun} {verb} **{loser.name}**, winning with just `{winner.health} HP` left!')
             print('yes9')
 
-        await play()

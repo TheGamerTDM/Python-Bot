@@ -58,6 +58,20 @@ class Fun(commands.Cog):
 
         await ctx.send(gif)
 
+    @commands.command(aliases=['ym','yomama','ymom'])
+    async def yomoma(self, ctx):
+        """Gives you a random Yomoma joke
+
+        EXAMPLE: pbyomoma
+        RESULT: sends a random joke about your mom ;)
+        Command aliases: ['ym','yomama','ymom']
+        """
+        r = requests.get('http://api.yomomma.info/')
+        data = json.loads(r.content)
+        tjokes = data['joke']
+
+        await ctx.send(tjokes)
+
     @commands.cooldown(1, 5, commands.BucketType.user)
     @commands.command(aliases=['POLL'])
     async def poll(self, ctx, *, args):
@@ -93,6 +107,7 @@ class Fun(commands.Cog):
             submission = next(x for x in memes_submissions if not x.stickied)
 
         await ctx.send(submission.url)
+
 
     @commands.command(aliases=['BOOBS'])
     @commands.is_nsfw()
