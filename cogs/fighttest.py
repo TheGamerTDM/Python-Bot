@@ -1,7 +1,5 @@
 import random
 import discord
-import asyncio
-from time import sleep
 from discord.ext import commands
 
 

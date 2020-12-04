@@ -1,4 +1,11 @@
-import random, time, asyncio, discord, praw, json, requests, aiohttp
+import asyncio
+import aiohttp
+import discord
+import json
+import praw
+import random
+import requests
+
 from discord.ext import commands
 
 
@@ -8,7 +15,8 @@ def setup(bot):
 
 agent = praw.Reddit(client_id='Ceva16eRbrWxog',
                     client_secret='0ZaRckgTXapz2D2z1N66UrNJHQQ',
-                    user_agent='1.0.0')
+                    user_agent='discord name yakoi#0666',
+                    username='PythonBot')
 
 
 def random_line(fname):
@@ -38,27 +46,36 @@ class Fun(commands.Cog):
             await ctx.send(f"{ctx.author.display_name} slapped {member.mention} {reason}!")
 
     @commands.command(aliases=['GIF'])
-    async def gif(self, ctx, *, pick):
+    async def gif(self, ctx, *, search: str = None):
         """Search on a gif sit on random gifs that you want
 
         EXAMPLE: pbgif hamster
         RESULT: sends a random gif of a hamster
         """
+        embed = discord.Embed(colour=discord.Colour.blue(), title=f'You search for "{search}" on GIPHY')
+        session = aiohttp.ClientSession()
 
-        apikey = "6EFTON5B6X16"
-        lmt = 50
+        if search is None:
+            embed = discord.Embed(colour=discord.Colour.blue(), title=f'You search for "random" on GIPHY')
+            response = await session.get(
+                'https://api.giphy.com/v1/gifs/random?api_key=ha15mc2mmkoPOCCXqzbTnr9SvPRM5PD2&limit=50&rating=PG-13'
+                '&lang=eu')
+            data = json.loads(await response.text())
+            embed.set_image(url=data['data']['images']['original']['url'])
+        else:
+            search.replace(' ', '+')
+            response = await session.get(
+                'http://api.giphy.com/v1/gifs/search?q=' + search + '&api_key=ha15mc2mmkoPOCCXqzbTnr9SvPRM5PD2&limit'
+                                                                    '=50&rating=PG-13&lang=eu')
+            data = json.loads(await response.text())
+            gif_choice = random.randint(0, 49)
+            embed.set_image(url=data['data'][gif_choice]['images']['original']['url'])
 
-        search_term = pick
+        await session.close()
 
-        r = requests.get(
-            "https://api.tenor.com/v1/search?q=%s&key=%s&limit=%s" % (search_term, apikey, lmt))
-        data = json.loads(r.content)
-        total_gifs = len(data['results'])
-        gif = data["results"][random.randint(0, total_gifs)]['url']
+        await ctx.send(embed=embed)
 
-        await ctx.send(gif)
-
-    @commands.command(aliases=['ym','yomama','ymom'])
+    @commands.command(aliases=['ym', 'yomama', 'ymom'])
     async def yomoma(self, ctx):
         """Gives you a random Yomoma joke
 
@@ -98,50 +115,63 @@ class Fun(commands.Cog):
         RESULT: sends a random meme
         Command aliases: ['memes']
         """
-        memez = random.choice(['memes', 'dankmemes'])
-        randomz = random.randint(0, 100)
-        memes_submissions = agent.subreddit(memez).top()
-        post_to_pick = random.randint(0, randomz)
+        memes_submissions = agent.subreddit('dankmemes').top()
+        post_to_pick = random.randint(0, 50)
 
-        for i in range(0, post_to_pick):
-            submission = next(x for x in memes_submissions if not x.stickied)
+        for i in range(post_to_pick):
+            self.subs1 = next(x for x in memes_submissions if not x.stickied)
 
-        await ctx.send(submission.url)
+        embed = discord.Embed(colour=discord.Colour.red(), title=f"**{self.subs1.title}**", url=self.subs1.url)
+        embed.set_image(url=self.subs1.url)
+        embed.set_footer(text=f'👍 {self.subs1.ups}  |  💬 {self.subs1.num_comments}')
 
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=['BOOBS'])
     @commands.is_nsfw()
     async def boobs(self, ctx):
 
         memes_submissions = agent.subreddit('boobs').top()
-        post_to_pick = random.randint(1, 50)
+        post_to_pick = random.randint(0, 50)
 
-        for i in range(0, post_to_pick):
-            submission = next(x for x in memes_submissions if not x.stickied)
+        for i in range(post_to_pick):
+            self.subs2 = next(x for x in memes_submissions if not x.stickied)
 
-        await ctx.send(submission.url)
+        embed = discord.Embed(colour=discord.Colour.red(), title=f"**{self.subs2.title}**", url=self.subs2.url)
+        embed.set_image(url=self.subs2.url)
+        embed.set_footer(text=f'👍 {self.subs2.ups}  |  💬 {self.subs2.num_comments}')
+
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=['ASS'])
     @commands.is_nsfw()
     async def ass(self, ctx):
         memes_submissions = agent.subreddit('ass').top()
-        post_to_pick = random.randint(1, 50)
+        post_to_pick = random.randint(0, 50)
 
-        for i in range(0, post_to_pick):
-            submission = next(x for x in memes_submissions if not x.stickied)
+        for i in range(post_to_pick):
+            self.subs3 = next(x for x in memes_submissions if not x.stickied)
 
-        await ctx.send(submission.url)
+        embed = discord.Embed(colour=discord.Colour.red(), title=f"**{self.subs3.title}**", url=self.subs3.url)
+        embed.set_image(url=self.subs3.url)
+        embed.set_footer(text=f'👍 {self.subs3.ups}  |  💬 {self.subs3.num_comments}')
+
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=['PUSSY'])
     @commands.is_nsfw()
     async def pussy(self, ctx):
         memes_submissions = agent.subreddit('pussy').top()
-        post_to_pick = random.randint(1, 50)
+        post_to_pick = random.randint(0, 50)
 
-        for i in range(0, post_to_pick):
-            submission = next(x for x in memes_submissions if not x.stickied)
+        for i in range(post_to_pick):
+            self.subs4 = next(x for x in memes_submissions if not x.stickied)
 
-        await ctx.send(submission.url)
+        embed = discord.Embed(colour=discord.Colour.red(), title=f"**{self.subs4.title}**", url=self.subs4.url)
+        embed.set_image(url=self.subs4.url)
+        embed.set_footer(text=f'👍 {self.subs4.ups}  |  💬 {self.subs4.num_comments}')
+
+        await ctx.send(embed=embed)
 
     @commands.command(aliases=['Reddit', 'rt', 'RT'])
     @commands.is_allowed()
@@ -154,19 +184,17 @@ class Fun(commands.Cog):
         Access only: Trusted
         """
 
-        hep = ['help', 'HELP']
-
-        if memez in hep:
-            await ctx.send(
-                '```py\n1. dankmemes\n2. memes\n3. ohffensivememes\n4. ksi\n5. Type what subreddit you want```')
-            return
-
         memes_submissions = agent.subreddit(memez).top()
-        post_to_pick = random.randint(1, 100)
-        for i in range(0, post_to_pick):
-            submission = next(x for x in memes_submissions if not x.stickied)
+        post_to_pick = random.randint(0, 50)
 
-        await ctx.send(submission.url)
+        for i in range(post_to_pick):
+            self.subs5 = next(x for x in memes_submissions if not x.stickied)
+
+        embed = discord.Embed(colour=discord.Colour.red(), title=f"**{self.subs5.title}**", url=self.subs5.url)
+        embed.set_image(url=self.subs5.url)
+        embed.set_footer(text=f'👍 {self.subs5.ups}  |  💬 {self.subs5.num_comments}')
+
+        await ctx.send(embed=embed)
 
     @commands.command(name="8ball", aliases=['8BALL'])
     async def _8ball(self, ctx, *, question):
@@ -287,7 +315,8 @@ class Fun(commands.Cog):
             return await ctx.send("*drinks beer with you* 🍻")
         if user.bot:
             return await ctx.send(
-                f"I would love to give beer to the bot **{ctx.author.name}**, but I don't think it will respond to you :/")
+                f"I would love to give beer to the bot **{ctx.author.name}**, but I don't think it will respond to "
+                f"you :/")
 
         beer_offer = f"**{user.name}**, you got a 🍺 offer from **{ctx.author.name}**"
         beer_offer = beer_offer + f"\n\n**Reason:** {reason}" if reason else beer_offer

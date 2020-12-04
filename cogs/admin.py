@@ -1,6 +1,6 @@
-import random, time, asyncio, discord, praw, json, requests
-from discord.ext import commands
 from asyncio import sleep
+import discord
+from discord.ext import commands
 
 
 class Admin(commands.Cog):
@@ -27,7 +27,7 @@ class Admin(commands.Cog):
 
     @commands.command(aliases=['SEND'])
     @commands.has_permissions(manage_messages=True)
-    async def send(self, ctx, channel, *, content):
+    async def send(self, channel, *, content):
         """Send a message to a channel
 
         EXAMPLE: pbsend #chat how are you guys
@@ -129,9 +129,9 @@ class Admin(commands.Cog):
             await ctx.send(embed=embed)
             await user.remove_roles(rolem)
 
-    @commands.command(name='remove', aliases=['dump', 'rm', 'clear','REMOVE','RM'])
+    @commands.command(name='remove', aliases=['dump', 'rm', 'clear', 'REMOVE', 'RM'])
     @commands.has_permissions(manage_messages=True)
-    async def prune(self, ctx, count: int):
+    async def prune(self, ctx, count: int = 1):
         """Deletes a specified amount of messages. (Max 100)
 
         EXAMPLE: pbpurne 50

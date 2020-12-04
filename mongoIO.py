@@ -1,13 +1,13 @@
 import discord
 
 
-class mongoIO():
+class mongoIO:
 
     def __init__(self, bot):
         self.config = bot.config
         self.db = bot.motorClient[self.config.mongo['database']]
 
-    async def addUser(self, member: discord.Member, blacklist: bool = False, osuID: int = None, osuServer: int = 0):
+    async def addUser(self, member: discord.Member, blacklist: bool = False):
         await self.db.users.insert_one(
             {
                 "blacklisted": blacklist,
@@ -22,7 +22,7 @@ class mongoIO():
 
     async def blacklistUser(self, member: discord.Member):
         if not await self.userExists(member):
-            await self.addUser(member, False, member.id)
+            await self.addUser(member, False)
         else:
             await self.db.users.update_one(
                 {"id": member.id},
@@ -36,7 +36,7 @@ class mongoIO():
 
     async def unblacklistUser(self, member: discord.Member):
         if not await self.userExists(member):
-            await self.addUser(member, False, member.id)
+            await self.addUser(member, False)
         else:
             await self.db.users.update_one(
                 {"id": member.id},

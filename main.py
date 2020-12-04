@@ -1,12 +1,9 @@
-import time
 import discord
 import asyncio
 import os
 import sys
 import traceback
 from classes.bot import PythonBot
-from discord.ext import commands
-import utils
 
 intent = discord.Intents.all()
 intent.presences = False
