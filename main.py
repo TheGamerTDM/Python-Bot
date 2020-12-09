@@ -36,7 +36,7 @@ def list_module(directory):
 @bot.event
 async def on_ready():
     print(f'{bot.user.name}')
-
+    bot.load_extension('music')
     # Load Modules
     module_folders = ['cogs']
     for module in module_folders:

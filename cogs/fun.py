@@ -13,10 +13,9 @@ def setup(bot):
     bot.add_cog(Fun(bot))
 
 
-agent = praw.Reddit(client_id='Ceva16eRbrWxog',
-                    client_secret='0ZaRckgTXapz2D2z1N66UrNJHQQ',
-                    user_agent='discord name yakoi#0666',
-                    username='PythonBot')
+agent = praw.Reddit(client_id="EOnBfnVDn_0Kug",
+                    client_secret='Y4K-niuDSmN1HHJAKJn4aL5NK4FNwA',
+                    user_agent='Maximielues:MEBOTCRACK:1.0.0 (by u/YOURSTRULYBEANBAG')
 
 
 def random_line(fname):
@@ -116,7 +115,7 @@ class Fun(commands.Cog):
         Command aliases: ['memes']
         """
         memes_submissions = agent.subreddit('dankmemes').top()
-        post_to_pick = random.randint(0, 50)
+        post_to_pick = random.randint(0, 99)
 
         for i in range(post_to_pick):
             self.subs1 = next(x for x in memes_submissions if not x.stickied)
@@ -132,7 +131,7 @@ class Fun(commands.Cog):
     async def boobs(self, ctx):
 
         memes_submissions = agent.subreddit('boobs').top()
-        post_to_pick = random.randint(0, 50)
+        post_to_pick = random.randint(0, 100)
 
         for i in range(post_to_pick):
             self.subs2 = next(x for x in memes_submissions if not x.stickied)
@@ -147,7 +146,7 @@ class Fun(commands.Cog):
     @commands.is_nsfw()
     async def ass(self, ctx):
         memes_submissions = agent.subreddit('ass').top()
-        post_to_pick = random.randint(0, 50)
+        post_to_pick = random.randint(0, 100)
 
         for i in range(post_to_pick):
             self.subs3 = next(x for x in memes_submissions if not x.stickied)
@@ -162,7 +161,7 @@ class Fun(commands.Cog):
     @commands.is_nsfw()
     async def pussy(self, ctx):
         memes_submissions = agent.subreddit('pussy').top()
-        post_to_pick = random.randint(0, 50)
+        post_to_pick = random.randint(0, 100)
 
         for i in range(post_to_pick):
             self.subs4 = next(x for x in memes_submissions if not x.stickied)
@@ -185,7 +184,7 @@ class Fun(commands.Cog):
         """
 
         memes_submissions = agent.subreddit(memez).top()
-        post_to_pick = random.randint(0, 50)
+        post_to_pick = random.randint(0, 100)
 
         for i in range(post_to_pick):
             self.subs5 = next(x for x in memes_submissions if not x.stickied)

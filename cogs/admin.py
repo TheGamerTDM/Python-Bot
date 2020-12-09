@@ -27,7 +27,7 @@ class Admin(commands.Cog):
 
     @commands.command(aliases=['SEND'])
     @commands.has_permissions(manage_messages=True)
-    async def send(self, channel, *, content):
+    async def send(self, ctx, channel, *, content):
         """Send a message to a channel
 
         EXAMPLE: pbsend #chat how are you guys

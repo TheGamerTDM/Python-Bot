@@ -44,6 +44,9 @@ def _command_signature(cmd):
 
 
 class Miscellaneous(commands.Cog):
+    def __init__(self, bot):
+        self.bot = bot
+
     """Core commands, these are the miscallaneous commands that don't fit into other categories'"""
 
     process = psutil.Process()
@@ -52,11 +55,8 @@ class Miscellaneous(commands.Cog):
     @commands.command()
     @commands.cooldown(1, 2, commands.cooldowns.BucketType.user)
     async def ping(self, ctx):
-        """Ping command."""
-        t1 = time.perf_counter()
-        await ctx.trigger_typing()
-        t2 = time.perf_counter()
-        await ctx.send(f"Ping: {round((t2 - t1) * 1000)} ms")
+        await ctx.send(f'Ping is '
+                       f'**{int(self.bot.latency * 1000)} ms**!')
 
     @commands.command()
     @commands.cooldown(1, 3, commands.cooldowns.BucketType.user)

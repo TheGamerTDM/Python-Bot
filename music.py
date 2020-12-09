@@ -167,12 +167,12 @@ class Music(commands.Cog):
         await self.connect_to(ctx.guild.id, None)
         await ctx.send(f'<:pepebigcry:767628237546192926> **Successfully disconnected**')
 
-    @commands.command(aliases=['q', 'Q''QUEUE', 'Queue'])
+    @commands.command(aliases=['q'])
     async def queue(self, ctx, page: int = 1):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
-        if not player.queue:
-            return await ctx.send(f'There isn\'t any track in queue. Use **Now** or **N**. To see what\'s playing')
+        if not player.is_playing:
+            return await ctx.send('🚫 | There\'s nothing in the queue! Why not queue something?')
 
         items_per_page = 10
         pages = math.ceil(len(player.queue) / items_per_page)
@@ -180,37 +180,65 @@ class Music(commands.Cog):
         start = (page - 1) * items_per_page
         end = start + items_per_page
 
-        duration = lavalink.utils.format_time(player.current.duration)
-
         queue_list = ''
-
+        queue_list += f'**[Now playing].** {self.format_song(player.current)}'
         for i, track in enumerate(player.queue[start:end], start=start):
-            durations = lavalink.utils.format_time(track.duration)
-            if durations[0:2] == '00':
-                if durations[3:4] == '0':
-                    queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[4:]} Requested by: {track.requester}`\n\n'
-                else:
-                    queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[3:]} Requested by: {track.requester}`\n\n'
-            else:
-                queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations} Requested by: {track.requester}`\n\n '
+            queue_list += f'**{i + 1}.** {self.format_song(track)}'
 
-        if duration[0:2] == '00':
-            if duration[3:4] == '0':
-                song = f'[{player.current.title}]({player.current.uri}) | `{duration[4:]} Requested by: {track.requester}`'
-            else:
-                song = f'[{player.current.title}]({player.current.uri}) | `{duration[3:]} Requested by: {track.requester}`'
-        else:
-            song = f'[{player.current.title}]({player.current.uri}) | `{duration} Requested by:{track.requester}`'
-
-        embed = discord.Embed(colour=ctx.guild.me.top_role.colour,
-                              title=f'**Queue list**',
-                              description=f'**__Now Playing:__**\n{song}\n\n**__Up Next:__**\n{queue_list}')
-
-        embed.set_footer(
-            icon_url=f'{ctx.message.author.avatar_url}',
-            text=f'\n {len(player.queue)} tracks \n page {page}/{pages}')
-
+        embed = discord.Embed(
+            color=0x2C2F33,
+            description=f'🎶 **Queue** - `{len(player.queue)}` tracks\n\n{queue_list}'
+        )
+        embed.set_footer(text=f'Page {page}/{pages}')
         await ctx.send(embed=embed)
+
+    def format_song(self, track):
+        return f'[{track.title}]({track.uri}) {self.bot.get_user(track.requester)}\n'
+
+    # @commands.command(aliases=['q', 'Q''QUEUE', 'Queue'])
+    # async def queue(self, ctx, page: int = 1):
+    #     player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+    #
+    #     if not player.queue:
+    #         return await ctx.send(f'There isn\'t any track in queue. Use **Now** or **N**. To see what\'s playing')
+    #
+    #     items_per_page = 10
+    #     pages = math.ceil(len(player.queue) / items_per_page)
+    #
+    #     start = (page - 1) * items_per_page
+    #     end = start + items_per_page
+    #
+    #     duration = lavalink.utils.format_time(player.current.duration)
+    #
+    #     queue_list = ''
+    #
+    #     for i, track in enumerate(player.queue[start:end], start=start):
+    #         durations = lavalink.utils.format_time(track.duration)
+    #         if durations[0:2] == '00':
+    #             if durations[3:4] == '0':
+    #                 queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[4:]} Requested by: {track.requester}`\n\n'
+    #             else:
+    #                 queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations[3:]} Requested by: {track.requester}`\n\n'
+    #         else:
+    #             queue_list += f'`{i + 1}.` [{track.title}]({track.uri}) | `{durations} Requested by: {track.requester}`\n\n '
+    #
+    #     if duration[0:2] == '00':
+    #         if duration[3:4] == '0':
+    #             song = f'[{player.current.title}]({player.current.uri}) | `{duration[4:]} Requested by: {track.requester}`'
+    #         else:
+    #             song = f'[{player.current.title}]({player.current.uri}) | `{duration[3:]} Requested by: {track.requester}`'
+    #     else:
+    #         song = f'[{player.current.title}]({player.current.uri}) | `{duration} Requested by:{track.requester}`'
+    #
+    #     embed = discord.Embed(colour=ctx.guild.me.top_role.colour,
+    #                           title=f'**Queue list**',
+    #                           description=f'**__Now Playing:__**\n{song}\n\n**__Up Next:__**\n{queue_list}')
+    #
+    #     embed.set_footer(
+    #         icon_url=f'{ctx.message.author.avatar_url}',
+    #         text=f'\n {len(player.queue)} tracks \n page {page}/{pages}')
+    #
+    #     await ctx.send(embed=embed)
 
     @commands.command(aliases=['np', 'N', 'n', 'playing'])
     async def now(self, ctx):
